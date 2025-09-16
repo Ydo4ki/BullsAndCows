@@ -1,0 +1,71 @@
+(: out rt.console.out)
+(: in rt.console.in)
+
+// this highlight on github is brilliant indeed
+
+(: read-digits! (fn [] int32 
+ ((parse-int (in.next-line!))
+  (do
+   (out.println! "Invalid input :(")
+   (read-digits!)
+  )
+ )
+))
+
+(: generate-number (fn [(= digits int32)] string8
+ (let possible-digits (mut ['1' '2' '3' '4' '5' '6' '7' '8' '9'])
+  (do
+   (: symbols (mut (vec char8 digits)))
+   (for i in symbols
+    (i.set! (possible-digits.remove! (rnd-int 0 possible-digits.size))))
+ 
+   (string8 symbols)
+  )
+ )
+))
+
+(: read-guess! (fn [(= number string8)] string8
+ (let input (in.next-line!)
+  ((== input.length number.length)
+   input
+   (do
+    (out.println! "Your guess must be " digits " digits long, try again!")
+	(read-guess! number)
+   )
+  )
+ )
+))
+
+(: guess-number! (fn [(= number string8)] unit 
+(let running (mut true) (while running (do
+ (: input (read-guess! number))
+ 
+ (: bulls (mut 0))
+ (: cows (mut 0))
+ ((== input number) 
+  (do
+   (out.println! digits " bulls! You won!")
+   (set! running false))
+  (for i in input (let ch (i)
+   ((== (number.get i.index) ch)
+    (inc! bulls)
+	((> (number.index-of ch) 0) (inc! cows) ())
+   )))
+ )
+)))))
+
+(out.println! "Welcome! Enter amount of digits to guess: ")
+
+(: digits (read-digits!))
+
+(: number (generate-number digits))
+
+(out.println! "Number guessed, now try to guess it.\n"
+"The output will indicate how far are you from the number:\n"
+"bull means that your guess contains a correct digit in a right place,
+cow means that your guess contains a correct digit in a wrong place")
+
+(guess-number! number)
+
+// oh no
+// i just realized that i can make the language a lot more readable using the same principle i used in my old macro system
